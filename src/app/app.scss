@@ -1,0 +1,352 @@
+// Real-index-card flashcard deck — mobile-first.
+//
+// Anatomy of a ruled index card:
+//   - cream / off-white card stock
+//   - red header rule near the top (one heavier line)
+//   - vertical red margin line on the left
+//   - evenly spaced blue horizontal ruled lines below the header
+//   - subtle shadow for depth
+
+$paper: #fffaf0;
+$paper-edge: #f3ead3;
+$rule-blue: #9ec5ed;
+$rule-red: #e0524a;
+$ink: #1f2a44;
+$ink-soft: #4a536b;
+$accent: #2b5a8a;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.6), transparent 50%),
+    linear-gradient(180deg, #e6ecf3 0%, #c8d2de 100%);
+  color: $ink;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.deck-app {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: 16px 16px max(20px, env(safe-area-inset-bottom)) 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  box-sizing: border-box;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filters {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+  button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: $ink-soft;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    &.active {
+      background: $accent;
+      color: #fff;
+    }
+  }
+}
+
+.counter {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 600;
+  color: $ink-soft;
+  letter-spacing: 0.04em;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1600px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stack-shadow {
+  position: absolute;
+  width: min(86vw, 360px);
+  aspect-ratio: 3 / 5;
+  border-radius: 14px;
+  background: $paper-edge;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.stack-shadow-1 {
+  transform: translate(6px, 8px) rotate(1.5deg);
+  opacity: 0.85;
+}
+
+.stack-shadow-2 {
+  transform: translate(-6px, 14px) rotate(-2.4deg);
+  opacity: 0.7;
+}
+
+.card {
+  width: min(86vw, 360px);
+  aspect-ratio: 3 / 5;
+  position: relative;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  background: transparent;
+  border: 0;
+
+  &:focus-visible {
+    outline: 3px solid $accent;
+    outline-offset: 6px;
+    border-radius: 14px;
+  }
+}
+
+.card-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  .card.flipped & {
+    transform: rotateY(180deg);
+  }
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background-color: $paper;
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1.5px),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      rgba(158, 197, 237, 0.55) 27px,
+      rgba(158, 197, 237, 0.55) 28px
+    );
+  background-position: 0 0, 0 56px;
+  background-repeat: repeat;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 12px 28px rgba(20, 30, 50, 0.22),
+    0 2px 6px rgba(20, 30, 50, 0.14);
+  border: 1px solid $paper-edge;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  padding: 18px 18px 18px 38px;
+  display: flex;
+  flex-direction: column;
+}
+
+.face.back {
+  transform: rotateY(180deg);
+}
+
+.rule-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 36px;
+  height: 2px;
+  background: $rule-red;
+  opacity: 0.78;
+}
+
+.margin-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 30px;
+  width: 1px;
+  background: $rule-red;
+  opacity: 0.6;
+}
+
+.category-tag {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: $rule-red;
+}
+
+.front-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 28px;
+}
+
+.card-name {
+  margin: 0;
+  font-size: clamp(26px, 7.5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: $ink;
+  line-height: 1.1;
+}
+
+.card-tagline {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: $ink-soft;
+}
+
+.flip-hint {
+  margin: 0;
+  align-self: center;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(31, 42, 68, 0.45);
+}
+
+.back-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 28px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.back-name {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: $ink;
+}
+
+.back-def {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: $ink;
+}
+
+.back-code {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: rgba(31, 42, 68, 0.94);
+  color: #f4f1e9;
+  border-radius: 8px;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: visible;
+
+  code {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+.back-hints {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: $ink-soft;
+
+  li {
+    margin-bottom: 4px;
+  }
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $ink-soft;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ctrl {
+  appearance: none;
+  border: 0;
+  background: rgba(255, 255, 255, 0.85);
+  color: $ink;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    0 2px 6px rgba(20, 30, 50, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  transition: transform 0.1s ease, background 0.15s ease;
+
+  &:active {
+    transform: translateY(1px) scale(0.97);
+    background: #fff;
+  }
+
+  &.shuffle {
+    flex: 1;
+    width: auto;
+    height: 48px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: $accent;
+  }
+}
+
+@media (min-width: 600px) {
+  .stack-shadow,
+  .card {
+    width: 360px;
+  }
+}

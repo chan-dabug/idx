@@ -1,0 +1,100 @@
+<main class="deck-app">
+  <header class="bar">
+    <div class="filters" role="tablist" aria-label="Card category">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="filter() === 'all'"
+        [attr.aria-selected]="filter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        All
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="filter() === 'sort'"
+        [attr.aria-selected]="filter() === 'sort'"
+        (click)="setFilter('sort')"
+      >
+        Sorts
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="filter() === 'pattern'"
+        [attr.aria-selected]="filter() === 'pattern'"
+        (click)="setFilter('pattern')"
+      >
+        Patterns
+      </button>
+    </div>
+    <div class="counter" aria-live="polite">
+      @if (total()) {
+        {{ index() + 1 }} / {{ total() }}
+      } @else {
+        0 / 0
+      }
+    </div>
+  </header>
+
+  @if (currentCard(); as card) {
+    <section
+      class="stage"
+      (pointerdown)="onPointerDown($event)"
+      (pointerup)="onPointerUp($event)"
+    >
+      <div class="stack-shadow stack-shadow-2" aria-hidden="true"></div>
+      <div class="stack-shadow stack-shadow-1" aria-hidden="true"></div>
+
+      <div
+        class="card"
+        [class.flipped]="isCurrentFlipped()"
+        (click)="onCardClick()"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="card.name + ' — tap to flip'"
+      >
+        <div class="card-inner">
+          <div class="face front">
+            <div class="rule-top"></div>
+            <div class="margin-line"></div>
+            <span class="category-tag">{{ card.category === 'sort' ? 'SORT' : 'PATTERN' }}</span>
+            <div class="front-body">
+              <h1 class="card-name">{{ card.name }}</h1>
+              <p class="card-tagline">{{ card.tagline }}</p>
+            </div>
+            <p class="flip-hint">tap to flip</p>
+          </div>
+
+          <div class="face back">
+            <div class="rule-top"></div>
+            <div class="margin-line"></div>
+            <div class="back-body">
+              <h2 class="back-name">{{ card.name }}</h2>
+              <p class="back-def">{{ card.definition }}</p>
+              <pre class="back-code"><code>{{ card.code }}</code></pre>
+              <ul class="back-hints">
+                @for (h of card.hints; track h) {
+                  <li>{{ h }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="empty">
+      <p>No cards in this category.</p>
+    </section>
+  }
+
+  <nav class="controls" aria-label="Deck controls">
+    <button type="button" class="ctrl" (click)="prev()" aria-label="Previous card">‹</button>
+    <button type="button" class="ctrl shuffle" (click)="shuffle()" aria-label="Shuffle deck">
+      shuffle
+    </button>
+    <button type="button" class="ctrl" (click)="next()" aria-label="Next card">›</button>
+  </nav>
+</main>
